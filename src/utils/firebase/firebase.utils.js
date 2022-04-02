@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app"; // um die app Instanz zu starten
 
 //importiere die authentification library von firebase --- wird für das google sign in benötigt (entweder per popup oder redirect)
-import { getAuth, signInWithRedirect, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
+import { getAuth, signInWithRedirect, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
 
 import {
     getFirestore,   // firestore instanz starten
@@ -57,7 +57,8 @@ export const db = getFirestore()    // die hier geschaffene Instanz gibt uns 1ma
 
 // hier wollen wir die Daten, die wir von dem authentification service aus signIn Component zurückerhalten(nach sign in) übergeben
 // und dann inside firestore speichern
-export  const createUserDocumentFromAuth = async (userAuth) => {
+export  const createUserDocumentFromAuth = async (userAuth, additionalInformation = {}) => {
+    // in additional information wird wegen unten genannt, der displayname übergeben {displayName: "mike"}
 
     // prüfen, ob eine bestiimte Instanz vom document user bereits existiert (Referenz)
     // die Methode doc() nimmt drei argumente:
@@ -86,12 +87,18 @@ export  const createUserDocumentFromAuth = async (userAuth) => {
             await setDoc(userDocRef, {              // Daten in das Document auf firestore eintragen und dabei Folgende Konfigs beachten
                 displayName,
                 email,
-                createdAt
+                createdAt,
+                ...additionalInformation            // display name wird bisher nicht angezeigt, da google auth das keyword selbst belegt. daher wird dann der name in diesen additional information gespeichert
             });
         } catch (error) {
             console.log("error creating the user", error);
         }
     }
     return userDocRef;
+}
 
+export const createAuthUserWithEmailAndPassword = async (email, password) => {
+    if (!email || !password) return;        // wenn weder email oder passwort agegeben ist, soll diese Funktion nicht ausgeführt werden (protect code)
+
+    return await createUserWithEmailAndPassword(auth, email, password);
 }
