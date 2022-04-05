@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app"; // um die app Instanz zu starten
 
 //importiere die authentification library von firebase --- wird für das google sign in benötigt (entweder per popup oder redirect)
-import { getAuth, signInWithRedirect, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
+import { getAuth, signInWithRedirect, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth"
 
 import {
     getFirestore,   // firestore instanz starten
@@ -66,15 +66,15 @@ export  const createUserDocumentFromAuth = async (userAuth, additionalInformatio
         // wie die entsprechende collection heißt (der folder) hier: users
         // der Unique identifier für den entsprechenden user (das document) -> hier übergeben wir aus dem auth service die "uid"
     const userDocRef = doc(db, "users", userAuth.uid)
-    console.log(userDocRef)
+    // console.log(userDocRef)
     // Bis hier hin, wird nach user login vom shop ein "leerer" Befehl mit user/userId an die Datenbank geschickt, weil noch nicht 
     // definiert wurde, wie die Daten verarbeitet werden sollen/ bzw. welche Daten abgefragt und gespeichert werden
 
     // mit getDoc versucht man die Daten zu einem Document zu erfassen. Also übergeben wir dem die user data von firestore, vom user der sich gerade authentifiziert hat
     // snapshot ist quasi die Dateien und ist auch ein SPEZIELLES OBJEKT
     const userSnapshot = await getDoc(userDocRef);
-    console.log(userSnapshot);
-    console.log(userSnapshot.exists()) // false, weil in meiner firestore database noch kein Eintrag zu diesem user vorhanden ist
+    // console.log(userSnapshot);
+    // console.log(userSnapshot.exists()) // false, weil in meiner firestore database noch kein Eintrag zu diesem user vorhanden ist
 
 
     // now check if user Data exists
@@ -97,8 +97,24 @@ export  const createUserDocumentFromAuth = async (userAuth, additionalInformatio
     return userDocRef;
 }
 
+// INTERFACE LAYER FUNCTIONS
+
 export const createAuthUserWithEmailAndPassword = async (email, password) => {
     if (!email || !password) return;        // wenn weder email oder passwort agegeben ist, soll diese Funktion nicht ausgeführt werden (protect code)
 
     return await createUserWithEmailAndPassword(auth, email, password);
 }
+
+// Diese Helper Funktion ist für das log in 
+export const signInAuthUserWithEmailAndPassword = async (email, password) => {
+    if (!email || !password) return;        // wenn weder email oder passwort agegeben ist, soll diese Funktion nicht ausgeführt werden (protect code)
+
+    return await signInWithEmailAndPassword(auth, email, password);
+}
+
+export const signOutUser = async () =>  signOut(auth);
+// async weil wir abwarten wollen, was signOut für ein promise returned
+
+
+// a callback everytime i want to call when auth state changes
+export const onAuthStateChangedListener = (callback) => onAuthStateChanged(auth, callback);

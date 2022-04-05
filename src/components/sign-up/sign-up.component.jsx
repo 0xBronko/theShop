@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 
 import { createAuthUserWithEmailAndPassword, createUserDocumentFromAuth } from "../../utils/firebase/firebase.utils";
 import Button from "../button/button.component";
 import FormInput from "../form-input/form-input.component";
+// import { UserContext } from "../../context/user.context"
 
 import "./sign-up-form.styles.scss";
 
@@ -22,6 +23,8 @@ const SignInForm = () => {
 
     // console.log(formFields)
 
+    // const { setCurrentUser } = useContext(UserContext)
+
     const resetFormFields = () => {
         setFormFields(defaultFormFields);
     };
@@ -37,7 +40,8 @@ const SignInForm = () => {
         // try and catch weil we call den firebase server und das kann natürlich fehlschlagen
         try {
             const {user} = await createAuthUserWithEmailAndPassword(mail, password); //destructured von formFields
-            console.log(user);
+
+            // setCurrentUser(user); // wenn ein user sich jetzt für das erste mal registriert, ist der user auch im context gespeichert
 
             await createUserDocumentFromAuth(user, {displayName}); // erst hiermit wird der user wirklich in die Datenbank gepushed. Vorher immer nur im auth zu sehen
             resetFormFields();
