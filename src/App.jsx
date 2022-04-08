@@ -1,14 +1,29 @@
-import './App.css';
+import { Route, Routes } from "react-router-dom";
+import Home from "./routes/home/home.routes";
+import Navigation from "./routes/navigation/navigation.routes";
+import Authentication from "./routes/authentication/authentication.component";
+import Shop from "./routes/shop/shop.component";
+import Checkout from "./routes/checkout/checkout.component";
+
+
+
+// const Shop = () => {
+//   return (
+//     <h1>shop test</h1>
+//   )
+// }
 
 const App = () => {
+
   return (
-    <div className='category-container'>
-      {/* <img src="" alt="" /> */}
-      <div className="category-body-container">
-        <h2>Womens</h2>
-        <p>Shop Now</p>
-      </div>
-    </div>
+    <Routes>
+      <Route path="/" element={<Navigation />}>
+          <Route index element={<Home />} />
+          <Route path="shop/*" element={<Shop />} /> 
+          <Route path="auth" element={<Authentication />} />
+          <Route path="checkout" element={<Checkout />} />
+      </Route>
+    </Routes>
   );
 }
 
