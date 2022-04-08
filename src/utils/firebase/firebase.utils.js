@@ -7,7 +7,11 @@ import {
     getFirestore,   // firestore instanz starten
     doc,            // Zugriff auf document type in firebase (user)
     getDoc,         // get document data in firebase (for each user)
-    setDoc          // set document data in firebase (for each user)
+    setDoc,          // set document data in firebase (for each user)
+    collection,
+    writeBatch,      // make sure that all objects we want to add to the collection are successfully added
+    query,          // iteriert durch firestore collection
+    getDocs         // gibt die documents aus firestore wieder
 } from "firebase/firestore";
 
 // Your web app's Firebase configuration von der Firebase Webseite. Das sind die Konfiguaraionsdaten zu diese speziellen Projekt
@@ -54,6 +58,32 @@ export const signInWithGooglePopup = () => signInWithPopup(auth, provider);
 
 export const db = getFirestore()    // die hier geschaffene Instanz gibt uns 1mal acces zur Database jedes mal um etwas zu ändern?
 
+
+export const addCollectionAndDocuments = async (collectionKey, objectsToAdd) => {   // async case we call a database to store data
+    const collectionRef = collection(db, collectionKey);
+    const batch = writeBatch(db);        //instaziate a batch class
+
+    objectsToAdd.forEach((object) => { //es gibt 5 verschiedene Objekte in unsere shopdata.js file
+        const docRef = doc(collectionRef, object.title.toLowerCase());
+        batch.set(docRef, object);
+    });
+
+    await batch.commit();
+    console.log("artikel hochgeladen");
+};
+// das hier ist alles genau so von firebase vorgegeben, man muss also nur wissen, wo es steht und wie man es anwendet, nicht auswendig kennen
+export const getCategoriesAndDocuments = async () => {
+    const collectionRef = collection(db, "categories");
+    const q = query(collectionRef);
+
+    const querySnapshot = await getDocs(q);         // getDocs fetches document snapshots
+    const categoryMap = querySnapshot.docs.reduce((acc, docSnapshot)=> {
+        const { title, items } = docSnapshot.data();
+        acc[title.toLowerCase()] = items;
+        return acc;
+    }, {})  // we reduce over an array to endl up with an object
+    return categoryMap;
+}
 
 // hier wollen wir die Daten, die wir von dem authentification service aus signIn Component zurückerhalten(nach sign in) übergeben
 // und dann inside firestore speichern

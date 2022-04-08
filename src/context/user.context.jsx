@@ -10,13 +10,13 @@ export const UserContext = createContext({
 });
 
 
+
 // provider is the actual component
 // the provider allows any of its child components to access the state inside of its useState
 export const UserProvider = ({children}) => {
     const [currentUser, setCurrentUser] = useState(null);
     const value = { currentUser, setCurrentUser };
 
-    // signOutUser(); // as soon as this userprovider mounts -> sign out
 
     useEffect(()=> {    // 
         const unsubscribe = onAuthStateChangedListener((user) => {  // receives callback function and passes this callback function as second parameter to onauthstagechange in firebase utils
@@ -24,7 +24,7 @@ export const UserProvider = ({children}) => {
             if(user) {
                 createUserDocumentFromAuth(user);
             }
-            setCurrentUser(user); // signout = null / wenn signed in ist user = authenticated user objekt
+            setCurrentUser(user); 
         })
         return unsubscribe;
     }, [])
